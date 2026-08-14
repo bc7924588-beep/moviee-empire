@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOVIEE | AI Universe & Global Streaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --accent: #ff0000; --bg: #000; --card: #121212; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Auto-Scrolling Hero */
+        .marquee { overflow: hidden; white-space: nowrap; background: #050505; padding: 15px 0; border-bottom: 1px solid #111; }
+        .marquee-inner { display: inline-flex; animation: scroll 40s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-card { width: 170px; height: 240px; margin: 0 8px; flex-shrink: 0; border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; }
+
+        /* Premium Netflix UI Components */
+        .movie-card { width: 140px; flex-shrink: 0; transition: 0.4s; cursor: pointer; position: relative; }
+        @media (min-width: 1024px) { .movie-card { width: 220px; } }
+        .movie-card:hover { transform: scale(1.06); z-index: 10; }
+        .movie-card img { border-radius: 12px; border: 1px solid #1a1a1a; }
+
+        /* AI Agents Grid */
+        .agent-grid { display: grid; grid-template-cols: repeat(2, 1fr); gap: 10px; }
+        @media (min-width: 768px) { .agent-grid { grid-template-cols: repeat(5, 1fr); } }
+        .agent-item { background: #111; border: 1px solid #222; padding: 15px; border-radius: 20px; text-align: center; transition: 0.3s; cursor: pointer; }
+        .agent-item:hover { border-color: var(--accent); background: #1a0505; }
+        .agent-item i { margin-bottom: 8px; display: block; margin-left: auto; margin-right: auto; }
+
+        /* Navigation */
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .bottom-nav { background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); border-top: 1px solid #111; }
+
+        /* Play Button Glow */
+        .glow-btn { 
+            background: linear-gradient(90deg, #E50914, #ff4d4d);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4); 
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- AD OVERLAY (FOR REVENUE) -->
+    <div id="ad-overlay" class="fixed inset-0 z-[10000] bg-black/98 hidden flex-col items-center justify-center text-center px-10">
+        <div class="bg-zinc-900 p-8 rounded-[2.5rem] border border-white/5 max-w-sm w-full">
+            <div class="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="zap" class="text-red-600 fill-red-600"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Connecting Server...</h3>
+            <p class="text-zinc-500 text-xs mb-8">Unlocking HD Link in <span id="timer" class="text-red-500 font-bold">5</span>s</p>
+            <button id="skip-ad" onclick="finishAd()" class="hidden w-full bg-white text-black py-3 rounded-xl font-black text-[10px] uppercase">Skip & Watch Now</button>
+        </div>
+    </div>
+
+    <!-- LOGO HEADER -->
+    <header class="p-6 text-center bg-black">
+        <h1 class="text-4xl font-900 italic tracking-tighter text-red-600">MOVIEE</h1>
+    </header>
+
+    <!-- PAGE: HOME -->
+    <main id="p-home" class="page active">
+        <!-- TRENDING AUTO-SCROLLER -->
+        <div class="marquee"><div class="marquee-inner" id="hero-slider"></div></div>
+
+        <div class="space-y-16 mt-12 px-6 lg:px-16">
+            <section><h3 class="text-xl font-800 uppercase italic mb-6">Hollywood & South Dubbed</h3><div id="row-holly" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div></section>
+            <section><h3 class="text-xl font-800 uppercase italic mb-6">Bollywood Blockbusters</h3><div id="row-bolly" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div></section>
+            <section><h3 class="text-xl font-800 uppercase italic mb-6 text-pink-500">Korean Drama</h3><div id="row-kdrama" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div></section>
+            <section><h3 class="text-xl font-800 uppercase italic mb-6 text-cyan-400">Cartoon & Anime</h3><div id="row-anime" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div></section>
+            <section><h3 class="text-xl font-800 uppercase italic mb-6 text-purple-500">Gaming World</h3><div id="row-gaming" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div></section>
+        </div>
+    </main>
+
+    <!-- PAGE: AI HUB (10 AGENTS) -->
+    <main id="p-ai" class="page pt-10 px-6 lg:px-16">
+        <h2 class="text-4xl font-900 italic uppercase mb-2 text-red-600">AI Command Hub</h2>
+        <p class="text-zinc-500 text-xs mb-10 tracking-widest uppercase">Select an specialized AI Agent to assist you</p>
+        
+        <div class="agent-grid mb-12">
+            <div class="agent-item" onclick="setAgent('Searcher', 'I will find any movie for you.')"><i data-lucide="search" class="text-red-500"></i><p class="text-[10px] font-bold">SEARCHER</p></div>
+            <div class="agent-item" onclick="setAgent('MoodBot', 'Tell me your mood (Happy/Sad/Excited).')"><i data-lucide="smile" class="text-yellow-500"></i><p class="text-[10px] font-bold">MOOD BOT</p></div>
+            <div class="agent-item" onclick="setAgent('Dubber', 'I find Multi-Audio & Dubbed content.')"><i data-lucide="languages" class="text-green-500"></i><p class="text-[10px] font-bold">DUBBER</p></div>
+            <div class="agent-item" onclick="setAgent('ProGamer', 'I scan live gaming arena.')"><i data-lucide="gamepad-2" class="text-purple-500"></i><p class="text-[10px] font-bold">PRO GAMER</p></div>
+            <div class="agent-item" onclick="setAgent('Otaku', 'Anime and Cartoons expert.')"><i data-lucide="tv" class="text-cyan-400"></i><p class="text-[10px] font-bold">OTAKU</p></div>
+            <div class="agent-item" onclick="setAgent('Critic', 'IMDb & Rotten Tomatoes analyst.')"><i data-lucide="star" class="text-orange-500"></i><p class="text-[10px] font-bold">CRITIC</p></div>
+            <div class="agent-item" onclick="setAgent('Chronos', 'History and Resume manager.')"><i data-lucide="history" class="text-blue-500"></i><p class="text-[10px] font-bold">CHRONOS</p></div>
+            <div class="agent-item" onclick="setAgent('Zen', 'Traffic and server balancer.')"><i data-lucide="shield-check" class="text-zinc-400"></i><p class="text-[10px] font-bold">ZEN MANAGER</p></div>
+            <div class="agent-item" onclick="setAgent('KidsAgent', 'Safe content only for children.')"><i data-lucide="baby" class="text-pink-400"></i><p class="text-[10px] font-bold">KIDS AGENT</p></div>
+            <div class="agent-item" onclick="setAgent('Cashier', 'Your reward points manager.')"><i data-lucide="dollar-sign" class="text-green-400"></i><p class="text-[10px] font-bold">CASHIER</p></div>
+        </div>
+
+        <div class="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 flex flex-col h-[400px]">
+            <div id="ai-chat-msgs" class="flex-1 overflow-y-auto space-y-4 mb-4 hide-scrollbar">
+                <div class="bg-zinc-800 p-4 rounded-2xl max-w-[85%] text-xs" id="agent-msg">System: Select an agent above to start chatting.</div>
+            </div>
+            <div class="flex gap-3">
+                <input type="text" id="ai-input" placeholder="Type here..." class="flex-1 bg-black border border-zinc-800 rounded-xl px-5 text-xs outline-none focus:border-red-600">
+                <button onclick="sendChat()" class="bg-red-600 p-4 rounded-xl"><i data-lucide="send" class="w-4"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- PAGE: ME (NETFLIX STYLE) -->
+    <main id="p-me" class="page pt-10 px-6 lg:px-16 pb-32">
+        <div class="max-w-4xl mx-auto">
+            <!-- Profile Header -->
+            <div class="flex items-center gap-6 mb-12">
+                <div class="w-24 h-24 rounded-2xl bg-red-600 flex items-center justify-center font-black text-4xl shadow-2xl border-4 border-zinc-900">A</div>
+                <div>
+                    <h2 class="text-3xl font-bold uppercase tracking-tighter">Admin User</h2>
+                    <div class="flex gap-4 mt-2">
+                        <span class="text-[10px] bg-yellow-500 text-black px-2 py-0.5 rounded font-black">PREMIUM</span>
+                        <span class="text-[10px] text-zinc-500 font-bold uppercase">Member since 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                <div class="bg-zinc-900 p-6 rounded-3xl border border-white/5 text-center">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1">Ad Points</p>
+                    <p class="text-2xl font-bold text-green-500">1,240</p>
+                </div>
+                <div class="bg-zinc-900 p-6 rounded-3xl border border-white/5 text-center">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1">Watched</p>
+                    <p class="text-2xl font-bold">142 hrs</p>
+                </div>
+                <div class="bg-zinc-900 p-6 rounded-3xl border border-white/5 text-center">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1">Level</p>
+                    <p class="text-2xl font-bold text-red-500">Gold</p>
+                </div>
+                <div class="bg-zinc-900 p-6 rounded-3xl border border-white/5 text-center">
+                    <p class="text-[9px] text-zinc-500 uppercase font-black mb-1">Invites</p>
+                    <p class="text-2xl font-bold">12</p>
+                </div>
+            </div>
+
+            <!-- Settings Menu -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-6">Account Settings</h3>
+                <div class="bg-zinc-900/30 rounded-3xl overflow-hidden border border-white/5">
+                    <div class="p-5 flex justify-between items-center border-b border-white/5 cursor-pointer hover:bg-zinc-900">
+                        <div class="flex items-center gap-4"><i data-lucide="bookmark" class="w-4"></i> <span class="text-sm font-bold">My Watchlist</span></div>
+                        <i data-lucide="chevron-right" class="w-4 text-zinc-600"></i>
+                    </div>
+                    <div class="p-5 flex justify-between items-center border-b border-white/5 cursor-pointer hover:bg-zinc-900">
+                        <div class="flex items-center gap-4"><i data-lucide="shield-check" class="w-4"></i> <span class="text-sm font-bold">Privacy & Security</span></div>
+                        <i data-lucide="chevron-right" class="w-4 text-zinc-600"></i>
+                    </div>
+                    <div class="p-5 flex justify-between items-center border-b border-white/5 cursor-pointer hover:bg-zinc-900">
+                        <div class="flex items-center gap-4"><i data-lucide="download-cloud" class="w-4"></i> <span class="text-sm font-bold">Offline Downloads</span></div>
+                        <i data-lucide="chevron-right" class="w-4 text-zinc-600"></i>
+                    </div>
+                    <div class="p-5 flex justify-between items-center cursor-pointer hover:bg-red-600/10" onclick="location.reload()">
+                        <div class="flex items-center gap-4 text-red-500"><i data-lucide="log-out" class="w-4"></i> <span class="text-sm font-bold">Logout Session</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PAGE: PLAYER -->
+    <main id="p-watch" class="page fixed inset-0 z-[5000] bg-black overflow-y-auto">
+        <div class="p-6 flex justify-between items-center bg-zinc-950 border-b border-white/5">
+            <button onclick="navigate('home')" class="text-xs font-black text-zinc-400 hover:text-white uppercase"><i data-lucide="arrow-left" class="inline w-4 mr-1"></i> Back</button>
+            <div class="text-[9px] font-black text-red-600 uppercase tracking-widest animate-pulse italic">Secure 4K Server: Connected</div>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center p-10 text-center min-h-[70vh]">
+            <div class="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center border border-white/10 mb-8 shadow-2xl"><i data-lucide="play" class="text-red-600 fill-red-600 w-10 h-10 ml-1"></i></div>
+            <h2 id="w-title" class="text-4xl lg:text-7xl font-900 italic uppercase leading-none mb-6"></h2>
+            <p id="w-desc" class="text-zinc-500 text-sm max-w-xl mx-auto mb-12 line-clamp-3"></p>
+            <button id="final-launch" class="glow-btn px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest text-white">Start High-Speed Stream</button>
+        </div>
+    </main>
+
+    <!-- BOTTOM TAB NAVIGATION -->
+    <nav class="fixed bottom-0 left-0 right-0 py-5 px-10 flex justify-between items-center bg-black/95 backdrop-blur-xl border-t border-white/5 z-[6000] bottom-nav">
+        <button onclick="navigate('home')" id="n-home" class="text-red-500 flex flex-col items-center gap-1"><i data-lucide="home"></i><span class="text-[8px] font-black uppercase">Home</span></button>
+        <button onclick="navigate('ai')" id="n-ai" class="text-zinc-500 flex flex-col items-center gap-1"><i data-lucide="bot"></i><span class="text-[8px] font-black uppercase">AI Bot</span></button>
+        <button onclick="navigate('me')" id="n-me" class="text-zinc-500 flex flex-col items-center gap-1"><i data-lucide="user"></i><span class="text-[8px] font-black uppercase">Me</span></button>
+    </nav>
+
+    <script>
+        const KEY = 'f2bc69c26bced1c1b23f0d3e57e6bfeb';
+        let currentAgent = 'Searcher';
+        let curM = {};
+
+        async function init() {
+            const r = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${KEY}`);
+            const d = await r.json();
+            
+            // Auto Slider Hero
+            const h = d.results.slice(0, 6);
+            document.getElementById('hero-slider').innerHTML = [...h, ...h].map(m => `
+                <div class="marquee-card" onclick="triggerAd('${m.id}', '${m.media_type||'movie'}', '${(m.title||m.name).replace(/'/g,"")}', '${m.overview.replace(/'/g,"")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover">
+                </div>`).join('');
+
+            loadRow('discover/movie', 'row-holly', 'with_original_language=en|te|ta');
+            loadRow('discover/movie', 'row-bolly', 'with_original_language=hi');
+            loadRow('discover/tv', 'row-kdrama', 'with_original_language=ko');
+            loadRow('discover/movie', 'row-anime', 'with_genres=16');
+            loadGaming();
+            lucide.createIcons();
+        }
+
+        async function loadRow(path, div, params='') {
+            const r = await fetch(`https://api.themoviedb.org/3/${path}?api_key=${KEY}&${params}`);
+            const d = await r.json();
+            document.getElementById(div).innerHTML = d.results.map(m => `
+                <div class="movie-card" onclick="triggerAd('${m.id}', '${m.media_type||'movie'}', '${(m.title||m.name).replace(/'/g,"")}', '${m.overview.replace(/'/g,"")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full">
+                    <h4 class="mt-4 text-[11px] font-black truncate uppercase tracking-tighter">${m.title || m.name}</h4>
+                </div>`).join('');
+        }
+
+        function loadGaming() {
+            const g = [{t:'GTA 5 Live', img:'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'}, {t:'Minecraft Pro', img:'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=500'}, {t:'FreeFire Final', img:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500'}];
+            document.getElementById('row-gaming').innerHTML = g.map(x => `<div class="movie-card"><img src="${x.img}" class="w-full aspect-video object-cover rounded-xl border border-zinc-800"><h4 class="mt-3 text-[10px] font-bold uppercase">${x.t}</h4></div>`).join('');
+        }
+
+        // --- BYPASS & AD SYSTEM ---
+        function triggerAd(id, type, title, desc) {
+            curM = {id, type, title, desc};
+            const overlay = document.getElementById('ad-overlay');
+            const skip = document.getElementById('skip-ad');
+            const t = document.getElementById('timer');
+            overlay.style.display = 'flex';
+            skip.classList.add('hidden');
+            let s = 5;
+            t.innerText = s;
+            const interval = setInterval(() => {
+                s--; t.innerText = s;
+                if(s <= 0) { clearInterval(interval); skip.classList.remove('hidden'); }
+            }, 1000);
+        }
+
+        function finishAd() {
+            document.getElementById('ad-overlay').style.display = 'none';
+            navigate('watch');
+            document.getElementById('w-title').innerText = curM.title;
+            document.getElementById('w-desc').innerText = curM.desc;
+            const url = curM.type === 'movie' ? `https://vidsrc.to/embed/movie/${curM.id}` : `https://vidsrc.to/embed/tv/${curM.id}/1/1`;
+            document.getElementById('final-launch').onclick = () => window.open(url, '_blank');
+        }
+
+        // --- NAVIGATION & AI ---
+        function navigate(p) {
+            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+            document.getElementById(`p-${p}`).classList.add('active');
+            ['home', 'ai', 'me'].forEach(i => document.getElementById(`n-${i}`).classList.replace('text-red-500', 'text-zinc-500'));
+            const activeNav = document.getElementById(`n-${p}`);
+            if(activeNav) activeNav.classList.replace('text-zinc-500', 'text-red-500');
+            window.scrollTo(0,0);
+        }
+
+        function setAgent(name, intro) {
+            currentAgent = name;
+            document.getElementById('agent-msg').innerHTML = `<b class="text-red-500">${name}:</b> ${intro}`;
+        }
+
+        async function sendChat() {
+            const inp = document.getElementById('ai-input');
+            const box = document.getElementById('ai-chat-msgs');
+            if(!inp.value) return;
+            box.innerHTML += `<div class="bg-red-600 p-3 rounded-xl ml-auto max-w-[85%] font-bold text-xs">Me: ${inp.value}</div>`;
+            const q = inp.value; inp.value = "";
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${KEY}&query=${q}`);
+            const d = await res.json();
+            setTimeout(() => {
+                if(d.results[0]) {
+                    const m = d.results[0];
+                    box.innerHTML += `<div class="bg-zinc-900 p-3 rounded-xl mr-auto max-w-[85%] text-xs"><b>${currentAgent}:</b> I found <b>${m.title||m.name}</b> for you. I am opening the server...</div>`;
+                    setTimeout(() => triggerAd(m.id, m.media_type||'movie', m.title||m.name, m.overview), 1500);
+                } else {
+                    box.innerHTML += `<div class="bg-zinc-900 p-3 rounded-xl mr-auto max-w-[85%] text-xs"><b>${currentAgent}:</b> I couldn't find that. Try another keyword.</div>`;
+                }
+                box.scrollTop = box.scrollHeight;
+            }, 800);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
